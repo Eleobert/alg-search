@@ -1,10 +1,14 @@
 #include "MatrixGraph.h"
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
+enum class Tiles: char {hearth = '\3'};
 
-std::ostream& operator<<(std::ostream& stream, const MatrixGraph& graph)
+void print(const MatrixGraph& graph, std::vector<MatrixNode> path)
 {
+    std::cout << path[0].i << ' ' << path[0].j << '\n';
+
     std::cout << "  ";
     for(int j = 0 ; j < graph.height(); j++) std::cout << ' ' << j;
     std::cout << "\n  ";
@@ -17,10 +21,25 @@ std::ostream& operator<<(std::ostream& stream, const MatrixGraph& graph)
         std::cout << i << "| ";
         for(int j = 0 ; j < graph.height(); j++)
         {
-            std::cout << graph[i][j] << ' ';
+            auto it = std::find(path.begin(), path.end(), MatrixNode(i, j));
+            if(path[0].i == i && path[0].j == j) std::cout << "\xe2\x99\xa5";
+            else if(path[path.size() - 1].i == i && path[path.size() - 1].j == j) std::cout << "\342\230\272";
+            else if(it != path.end())
+            {
+                std::cout << "*";
+            }
+            else{
+                std::cout << graph[i][j];
+            }
+            std::cout << ' ';
         }
         std::cout << '\n';
     }
+}
+
+std::ostream& operator<<(std::ostream& stream, const MatrixNode& node)
+{
+    stream << '(' << node.i << ", " << node.j << ')';
     return stream;
 }
 

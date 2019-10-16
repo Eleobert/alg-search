@@ -3,8 +3,10 @@
 #include <string>
 
 struct MatrixGraph;
+struct MatrixNode;
 
 MatrixGraph makeGraphFromFile(std::string filepath);
+void print(const MatrixGraph& graph, std::vector<MatrixNode> path = {});
 
 struct MatrixNode
 {
@@ -20,7 +22,6 @@ struct MatrixNode
 
 bool operator==(const MatrixNode& a, const MatrixNode& b);
 bool operator!=(const MatrixNode& a, const MatrixNode& b);
-
 
 struct MatrixGraph
 {
@@ -40,4 +41,4 @@ private:
     friend MatrixGraph makeGraphFromFile(std::string filepath);
 };
 
-std::ostream& operator<<(std::ostream& stream, const MatrixGraph& graph);
+std::ostream& operator<<(std::ostream& stream, const MatrixNode& node);

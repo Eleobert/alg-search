@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include <queue>
 #include <cmath>
+#include <iostream> //TODO temporary,only for debugging
 
 constexpr float infinity = 10000000.0f;
 
@@ -79,7 +80,7 @@ std::vector<MatrixNode> dijkstra(const MatrixNode& start, const MatrixNode& end,
         throw(std::string("Invalid end point"));
 
     auto data = createDataMatrix(graph.width(), graph.height());
-
+    std::cout << "Data matix created. " << data.size() << ' ' << data[0].size() << std::endl; 
     auto comparator = [&data](const MatrixNode& a, const MatrixNode& b){
         return data[a.i][a.j].cost < data[a.i][a.j].cost;
     };
@@ -99,25 +100,29 @@ std::vector<MatrixNode> dijkstra(const MatrixNode& start, const MatrixNode& end,
             open.emplace(Node(i, j), nullptr, infinity);
         }
     }*/
-    auto& current = open.top();
+
     while(!open.empty())
     {
+        auto current = open.top();
         open.pop();
-        //current.closed = true;
+        std::cout << current << std::endl;
 
         for(auto& neighbor: getNeighbors(current, graph))
         {
+            //std::cout << "Trying to pop " << neighbor << std::endl; 
             int cost = data[current.i][current.j].cost + heuristic::manhattan(current, neighbor);
             if(cost < data[neighbor.i][neighbor.j].cost)
             {
                 data[neighbor.i][neighbor.j].cost = cost;
                 data[neighbor.i][neighbor.j].parent = current;
                 open.emplace(neighbor);
+                std::cout << "Node " << neighbor << " opened" << std::endl;
             }
         }
 
     }
+    std::cout << " Exiting from Dijkstra" << std::endl;
 
-    return recunstructPath(start, current, data);
+    return recunstructPath(start, end, data);
 
 }

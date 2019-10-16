@@ -4,13 +4,14 @@
 
 int main()
 {
-    auto graph = makeGraphFromFile("input");
+    auto graph = makeGraphFromFile("../input");
     //std::cout << graph.width();
     //std::cout << graph.height();
-    std::cout << graph << std::endl;
 
     try{
-        auto path = dijkstra(MatrixNode(0, 0), MatrixNode(9, 7), graph);
+        auto path = dijkstra(MatrixNode(4, 0), MatrixNode(6, 8), graph);
+        print(graph, path);
+
         for(auto& node: path)
         {
             std::cout << node.i << ' ' << node.j << '\n';
