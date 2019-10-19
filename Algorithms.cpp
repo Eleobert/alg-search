@@ -3,6 +3,7 @@
 #include <queue>
 #include <cmath>
 #include <iostream> //TODO temporary,only for debugging
+#include <stdexcept>
 
 constexpr float infinity = 10000000.0f;
 
@@ -49,7 +50,7 @@ namespace heuristic
 
 }
 
-auto recunstructPath(MatrixNode start, MatrixNode end, std::vector<std::vector<NodeData>>& data) //TODO data should be const
+auto recunstructPath(MatrixNode start, MatrixNode end, const std::vector<std::vector<NodeData>>& data)
 {
     std::vector<MatrixNode> result;
     do
@@ -75,12 +76,11 @@ std::vector<MatrixNode> dijkstra(const MatrixNode& start, const MatrixNode& end,
 {
 
     if(!inbox(start.i, start.j, graph.height(), graph.width()) || graph[start.i][start.j] == 1)
-        throw(std::string("Invalid start point"));
+        throw std::runtime_error("Invalid start point");
     if(!inbox(end.i, end.j, graph.height(), graph.width()) || graph[end.i][end.j] == 1)
-        throw(std::string("Invalid end point"));
+        throw std::runtime_error("Invalid end point");
 
     auto data = createDataMatrix(graph.width(), graph.height());
-    std::cout << "Data matix created. " << data.size() << ' ' << data[0].size() << std::endl; 
     auto comparator = [&data](const MatrixNode& a, const MatrixNode& b){
         return data[a.i][a.j].cost < data[a.i][a.j].cost;
     };
@@ -90,39 +90,23 @@ std::vector<MatrixNode> dijkstra(const MatrixNode& start, const MatrixNode& end,
     open.emplace(start);
     data[start.i][start.j].cost = 0;
 
-
-/*
-    for(int i = 0; i < graph.height(); i++)
-    {
-        for(int j = 0; j < graph.width(); j++)
-        {
-            if(graph[i][j] == 1) continue;
-            open.emplace(Node(i, j), nullptr, infinity);
-        }
-    }*/
-
     while(!open.empty())
     {
         auto current = open.top();
         open.pop();
-        std::cout << current << std::endl;
 
         for(auto& neighbor: getNeighbors(current, graph))
         {
-            //std::cout << "Trying to pop " << neighbor << std::endl; 
             int cost = data[current.i][current.j].cost + heuristic::manhattan(current, neighbor);
             if(cost < data[neighbor.i][neighbor.j].cost)
             {
                 data[neighbor.i][neighbor.j].cost = cost;
                 data[neighbor.i][neighbor.j].parent = current;
                 open.emplace(neighbor);
-                std::cout << "Node " << neighbor << " opened" << std::endl;
             }
         }
-
     }
-    std::cout << " Exiting from Dijkstra" << std::endl;
-
+    if(data[end.i][end.j].cost == infinity) throw std::runtime_error("No path found!");
     return recunstructPath(start, end, data);
 
 }

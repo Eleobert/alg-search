@@ -5,20 +5,15 @@
 int main()
 {
     auto graph = makeGraphFromFile("../input");
-    //std::cout << graph.width();
-    //std::cout << graph.height();
 
-    try{
-        auto path = dijkstra(MatrixNode(4, 0), MatrixNode(6, 8), graph);
-        print(graph, path);
-
-        for(auto& node: path)
-        {
-            std::cout << node.i << ' ' << node.j << '\n';
-        }
-    }catch(const std::string& message)
+    try
     {
-        std::cout << message << '\n';
+        auto path = dijkstra(MatrixNode(4, 0), MatrixNode(6, 0), graph);
+        print(graph, path);
+    }
+    catch(const std::exception& ex)
+    {
+        std::cout << ex.what() << '\n';
     }
 
 }

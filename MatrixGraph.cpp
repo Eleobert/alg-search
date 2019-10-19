@@ -7,8 +7,6 @@ enum class Tiles: char {hearth = '\3'};
 
 void print(const MatrixGraph& graph, std::vector<MatrixNode> path)
 {
-    std::cout << path[0].i << ' ' << path[0].j << '\n';
-
     std::cout << "  ";
     for(int j = 0 ; j < graph.height(); j++) std::cout << ' ' << j;
     std::cout << "\n  ";
