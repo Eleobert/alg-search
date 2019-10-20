@@ -4,6 +4,10 @@
 #include <cmath>
 #include <iostream> //TODO temporary,only for debugging
 #include <stdexcept>
+#include "Heuristics.h"
+
+
+//TODO fix case
 
 constexpr float infinity = 10000000.0f;
 
@@ -18,13 +22,31 @@ struct NodeData
 
     MatrixNode parent;
     float cost = infinity;
-    //bool closed = false;
 };
-/*
-bool operator<(const NodeData& a, const NodeData& b)
+
+/* cost() and parent() should be on Utils.h, but so, I couldn't hide NodeData struct from the user */
+auto& cost(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
 {
-    return a.cost < b.cost;
-}*/
+    return data[node.i][node.j].cost;
+}
+
+auto cost(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
+{
+    return data[node.i][node.j].cost;
+}
+
+
+auto& parent(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
+{
+    return data[node.i][node.j].parent;
+}
+
+auto parent(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
+{
+    return data[node.i][node.j].parent;
+}
+
+
 auto getNeighbors(const MatrixNode& node, const MatrixGraph& graph)
 {
     std::vector<MatrixNode> result;
@@ -41,23 +63,15 @@ auto getNeighbors(const MatrixNode& node, const MatrixGraph& graph)
     return result;
 }
 
-namespace heuristic
-{
-    float manhattan(const MatrixNode& start, const MatrixNode& end)
-    {
-        return std::abs(start.i - end.i) + std::abs(start.j - end.j);
-    }
-
-}
-
-auto recunstructPath(MatrixNode start, MatrixNode end, const std::vector<std::vector<NodeData>>& data)
+auto recunstructPath(const MatrixNode& start, MatrixNode end, const std::vector<std::vector<NodeData>>& data)
 {
     std::vector<MatrixNode> result;
-    do
+    while (end != start)
     {
         result.emplace_back(end);
-        end = data[end.i][end.j].parent;
-    }while (end != start);
+        end = parent(end, data);
+    }
+    result.emplace_back(end); //push the start point
     return result;
 }
 
@@ -72,7 +86,63 @@ auto createDataMatrix(int w, int h)
     return result;
 }
 
-std::vector<MatrixNode> dijkstra(const MatrixNode& start, const MatrixNode& end, const MatrixGraph& graph)
+//this is my own implementation of line_of_sight
+bool line_of_sight(const MatrixNode& a, const MatrixNode& b, const MatrixGraph& graph)
+{
+    //create a linear function that maps j -> i
+    auto linearx = [&](int x)
+    {
+        return static_cast<float>(b.i - a.i)/(b.j - a.j) * x + static_cast<float>(b.j * a.i - a.j * b.i)/(b.j - a.j);
+    };
+
+    for(int j = a.j; j != b.j; (a.j < b.j)? j++: j--)
+    {
+        if(graph[linearx(j)][j] == 1) return false;
+    }
+
+    //do the same thing for i
+    //create a linear function that maps i -> j
+    auto lineary = [&](int y)
+    {
+        return static_cast<float>(b.j - a.j)/(b.i - a.i) * y + static_cast<float>(b.i * a.j - a.i * b.j)/(b.i - a.i);
+    };
+
+    for(int i = a.i; i != b.i; (a.i < b.i)? i++: i--)
+    {
+        if(graph[i][lineary(i)] == 1) return false;
+    }
+
+    return true;
+}
+
+
+
+void theta_update_vertex(MatrixNode& current, MatrixNode& neighbor, const MatrixGraph& graph, std::vector<std::vector<NodeData>>& data,
+    heuristics::heuristic_t heuristic)
+{
+    if(line_of_sight(parent(current, data), neighbor, graph))
+    {
+        cost(neighbor, data) = cost(parent(current, data), data) + heuristic(parent(current, data), neighbor);
+        parent(neighbor, data) = parent(current, data);
+    }
+    else
+    {
+        cost(neighbor, data) = cost(current, data) + heuristic(current, neighbor);
+        parent(neighbor, data) = current;
+    }
+    
+}
+/*
+ * This function seems to have a huge amount of arguments but it doesn't.
+ * start - is the start point
+ * end   - is the end point
+ * graph - the graph we working with
+ * heuristic - is the heuristic function
+ * update_vertex - is the function we call each time a neighboar is found
+ * Это все очень просто!
+*/
+std::vector<MatrixNode> _astar(const MatrixNode& start, const MatrixNode& end, const MatrixGraph& graph, heuristics::heuristic_t heuristic,
+    bool use_theta) 
 {
 
     if(!inbox(start.i, start.j, graph.height(), graph.width()) || graph[start.i][start.j] == 1)
@@ -82,13 +152,14 @@ std::vector<MatrixNode> dijkstra(const MatrixNode& start, const MatrixNode& end,
 
     auto data = createDataMatrix(graph.width(), graph.height());
     auto comparator = [&data](const MatrixNode& a, const MatrixNode& b){
-        return data[a.i][a.j].cost < data[a.i][a.j].cost;
+        return cost(a, data) < cost(b, data);
     };
 
     std::priority_queue<MatrixNode, std::vector<MatrixNode>, decltype(comparator)> open(comparator);
 
     open.emplace(start);
-    data[start.i][start.j].cost = 0;
+    parent(start, data) = start; //to avoid bugs when looking for parent of start (bug found on theta_update_vertex)
+    cost(start, data) = 0;
 
     while(!open.empty())
     {
@@ -97,16 +168,23 @@ std::vector<MatrixNode> dijkstra(const MatrixNode& start, const MatrixNode& end,
 
         for(auto& neighbor: getNeighbors(current, graph))
         {
-            int cost = data[current.i][current.j].cost + heuristic::manhattan(current, neighbor);
-            if(cost < data[neighbor.i][neighbor.j].cost)
+            auto newcost = cost(current, data) + heuristic(neighbor, end);
+            if(newcost < data[neighbor.i][neighbor.j].cost)
             {
-                data[neighbor.i][neighbor.j].cost = cost;
-                data[neighbor.i][neighbor.j].parent = current;
+                if(use_theta)
+                {
+                    theta_update_vertex(current, neighbor, graph, data, heuristic);
+                }
+                else
+                {
+                    cost(neighbor, data) = newcost;
+                    parent(neighbor, data) = current;
+                }
                 open.emplace(neighbor);
             }
         }
     }
-    if(data[end.i][end.j].cost == infinity) throw std::runtime_error("No path found!");
+    if(cost(end, data) == infinity) throw std::runtime_error("No path found!");
     return recunstructPath(start, end, data);
 
 }

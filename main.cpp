@@ -1,6 +1,7 @@
 #include "MatrixGraph.h"
 #include "Algorithms.h"
 #include <iostream>
+#include "Heuristics.h"
 
 int main()
 {
@@ -8,7 +9,7 @@ int main()
 
     try
     {
-        auto path = dijkstra(MatrixNode(4, 0), MatrixNode(6, 0), graph);
+        auto path = thetastar({2, 0}, {9, 9}, graph);
         print(graph, path);
     }
     catch(const std::exception& ex)
