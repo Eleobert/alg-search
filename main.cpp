@@ -9,7 +9,7 @@ int main()
 
     try
     {
-        auto path = thetastar({2, 0}, {9, 9}, graph);
+        auto path = dijkstra({2, 0}, {9, 9}, graph);
         print(graph, path);
     }
     catch(const std::exception& ex)

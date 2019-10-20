@@ -3,36 +3,54 @@
 #include <fstream>
 #include <algorithm>
 
-enum class Tiles: char {hearth = '\3'};
+
+namespace symbols
+{
+    auto hearth = "\xe2\x99\xa5";
+    auto face   = "\342\230\272";
+    auto brick  = "☐";
+}
 
 void print(const MatrixGraph& graph, std::vector<MatrixNode> path)
 {
-    std::cout << "  ";
-    for(int j = 0 ; j < graph.height(); j++) std::cout << ' ' << j;
-    std::cout << "\n  ";
-    for(int j = 0 ; j < graph.height(); j++) std::cout << ' ' << '-';
-    std::cout << '\n';
+    //std::cout << "  ";
+    for(int j = 0 ; j < graph.width() + 2; j++) std::cout << symbols::brick << ' ';
+    std::cout << "\n";
+    //for(int j = 0 ; j < graph.height(); j++) std::cout << ' ' << '-';
+    //std::cout << '\n';
 
 
     for(int i = 0; i < graph.width(); i++)
     {
-        std::cout << i << "| ";
+        std::cout << symbols::brick << ' ';
         for(int j = 0 ; j < graph.height(); j++)
         {
             auto it = std::find(path.begin(), path.end(), MatrixNode(i, j));
-            if(path[0].i == i && path[0].j == j) std::cout << "\xe2\x99\xa5";
-            else if(path[path.size() - 1].i == i && path[path.size() - 1].j == j) std::cout << "\342\230\272";
+            if(path[0].i == i && path[0].j == j) std::cout << symbols::hearth;
+            else if(path[path.size() - 1].i == i && path[path.size() - 1].j == j) std::cout << symbols::face;
             else if(it != path.end())
             {
-                std::cout << "*";
+                std::cout << "⚬";
             }
             else{
-                std::cout << graph[i][j];
+                if (graph[i][j] == 1)
+                {
+                    std::cout << symbols::brick;
+                }
+                if (graph[i][j] == 0)
+                {
+                    std::cout << ' ';
+                }
+                
             }
             std::cout << ' ';
         }
-        std::cout << '\n';
+        std::cout << symbols::brick << '\n';
     }
+
+    for(int j = 0 ; j < graph.width() + 2; j++) std::cout << symbols::brick << ' ';
+    std::cout << '\n';
+    
 }
 
 std::ostream& operator<<(std::ostream& stream, const MatrixNode& node)
