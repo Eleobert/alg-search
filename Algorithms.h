@@ -11,26 +11,33 @@
 
 //  _astar function implemented in Application.cpp, takes the heuristic function as
 // funcion parameter. The user should not use this function (it's just a helper function) 
-std::vector<MatrixNode> _astar(const MatrixNode& start, const MatrixNode& end, const MatrixGraph& graph, 
-float h(const MatrixNode&, const MatrixNode&), bool use_theta);
+std::vector<MatrixNode> basic_algorithm(const MatrixNode& start, const MatrixNode& end, const MatrixGraph& graph, 
+heuristics::heuristic_t heuristic, int k,  bool use_theta);
 
 //A* function, implemented here. Takes the heuristic funtion as template 
-template <float h(const MatrixNode&, const MatrixNode&)>
+template <heuristics::heuristic_t heuristic, int k>
 std::vector<MatrixNode> astar(const MatrixNode& start, const MatrixNode& end, const MatrixGraph& graph)
 {
-    // call the helper (and real) function
-    return _astar(start, end, graph, h, false);
+    static_assert(k >= 0 && k <= 5, "No function astar for this value of k.");
+    // call the helper (and real) function  
+    return basic_algorithm(start, end, graph, heuristic, k, false);
 }
 
-//dijskra function (just astar taking no heuristic)
+// dijskra function (just astar taking no heuristic)
+// k as template parameter avoid invalid valueof k 
+template<int k>
 inline std::vector<MatrixNode> dijkstra(const MatrixNode& start, const MatrixNode& end, const MatrixGraph& graph)
 {
-    return astar<heuristics::noheuristic>(start, end, graph);
+    static_assert(k >= 0 && k <= 5, "No function dijkstra for this value of k.");
+    return astar<heuristics::noheuristic, k>(start, end, graph);
 }
 
 
-//Theta* function
+// Theta* function
+// k as template parameter avoid invalid value of k 
+template<int k>
 inline std::vector<MatrixNode> thetastar(const MatrixNode& start, const MatrixNode& end, const MatrixGraph& graph)
 {
-    return _astar(start, end, graph, heuristics::euclidian, true);
+    return basic_algorithm(start, end, graph, heuristics::euclidian, k, true);
 }
+

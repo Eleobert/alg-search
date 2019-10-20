@@ -46,8 +46,8 @@ auto parent(const MatrixNode& node, const std::vector<std::vector<NodeData>>& da
     return data[node.i][node.j].parent;
 }
 
-
-auto getNeighbors(const MatrixNode& node, const MatrixGraph& graph)
+// I didn't found a pattern, so just brute force it!
+auto getNeighbors(int k, const MatrixNode& node, const MatrixGraph& graph)
 {
     std::vector<MatrixNode> result;
     auto conditionalPush = [&](int i, int j)
@@ -60,6 +60,48 @@ auto getNeighbors(const MatrixNode& node, const MatrixGraph& graph)
     conditionalPush(node.i + 1, node.j);
     conditionalPush(node.i, node.j - 1);
     conditionalPush(node.i, node.j + 1);
+    
+    if(k >= 3)
+    {
+        conditionalPush(node.i - 1, node.j - 1);
+        conditionalPush(node.i - 1, node.j + 1);
+        conditionalPush(node.i + 1, node.j - 1);
+        conditionalPush(node.i + 1, node.j + 1);
+        
+        if(k >= 4)
+        {
+            conditionalPush(node.i - 1, node.j - 2);
+            conditionalPush(node.i - 1, node.j + 2);
+            conditionalPush(node.i - 2, node.j - 1);
+            conditionalPush(node.i - 2, node.j + 1);
+            conditionalPush(node.i + 1, node.j - 2);
+            conditionalPush(node.i + 1, node.j + 2);
+            conditionalPush(node.i + 2, node.j - 1);
+            conditionalPush(node.i + 2, node.j + 1);
+            
+            if(k == 5)
+            {
+                conditionalPush(node.i - 1, node.j - 3);
+                conditionalPush(node.i - 1, node.j + 3);
+                conditionalPush(node.i - 2, node.j - 3);
+                conditionalPush(node.i - 2, node.j + 3);
+                conditionalPush(node.i - 3, node.j - 2);
+                conditionalPush(node.i - 3, node.j + 2);
+                conditionalPush(node.i - 3, node.j - 1);
+                conditionalPush(node.i - 3, node.j + 1);
+                conditionalPush(node.i + 1, node.j - 3);
+                conditionalPush(node.i + 1, node.j + 3);
+                conditionalPush(node.i + 2, node.j - 3);
+                conditionalPush(node.i + 2, node.j + 3);
+                conditionalPush(node.i + 3, node.j - 2);
+                conditionalPush(node.i + 3, node.j + 2);
+                conditionalPush(node.i + 3, node.j - 1);
+                conditionalPush(node.i + 3, node.j + 1);
+            }
+        }
+    }
+    
+
     return result;
 }
 
@@ -86,6 +128,7 @@ auto createDataMatrix(int w, int h)
     return result;
 }
 
+//TODO fix that small bug
 //this is my own implementation of line_of_sight
 bool line_of_sight(const MatrixNode& a, const MatrixNode& b, const MatrixGraph& graph)
 {
@@ -138,11 +181,11 @@ void theta_update_vertex(MatrixNode& current, MatrixNode& neighbor, const Matrix
  * end   - is the end point
  * graph - the graph we working with
  * heuristic - is the heuristic function
- * update_vertex - is the function we call each time a neighboar is found
+ * use_theta - true if we want to use theta* algotithm
  * Это все очень просто!
 */
-std::vector<MatrixNode> _astar(const MatrixNode& start, const MatrixNode& end, const MatrixGraph& graph, heuristics::heuristic_t heuristic,
-    bool use_theta) 
+std::vector<MatrixNode> basic_algorithm(const MatrixNode& start, const MatrixNode& end, const MatrixGraph& graph, heuristics::heuristic_t heuristic,
+    int k, bool use_theta) 
 {
 
     if(!inbox(start.i, start.j, graph.height(), graph.width()) || graph[start.i][start.j] == 1)
@@ -166,11 +209,25 @@ std::vector<MatrixNode> _astar(const MatrixNode& start, const MatrixNode& end, c
         auto current = open.top();
         open.pop();
 
-        for(auto& neighbor: getNeighbors(current, graph))
+        for(auto& neighbor: getNeighbors(k, current, graph))
         {
             auto newcost = cost(current, data) + heuristic(neighbor, end);
-            if(newcost < data[neighbor.i][neighbor.j].cost)
+            if(newcost < data[neighbor.i][neighbor.j].cost && line_of_sight(current, neighbor, graph))
             {
+                /*if(line_of_sight(parent(current, data), neighbor, graph)) // in theta astar allways true for k < 4
+                {
+                    if(use_theta)
+                    {
+                        cost(neighbor, data) = cost(parent(current, data), data) + heuristic(parent(current, data), neighbor);
+                        parent(neighbor, data) = parent(current, data);
+                    }
+                    else
+                    {
+                        cost(neighbor, data) = newcost;
+                        parent(neighbor, data) = current;
+                    }
+                    open.emplace(neighbor);
+                }*/
                 if(use_theta)
                 {
                     theta_update_vertex(current, neighbor, graph, data, heuristic);
