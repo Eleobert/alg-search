@@ -5,7 +5,8 @@
 struct MatrixGraph;
 struct MatrixNode;
 
-MatrixGraph makeGraphFromFile(std::string filepath);
+MatrixGraph make_graph(std::string filepath);
+
 void print(const MatrixGraph& graph, std::vector<MatrixNode> path = {});
 
 struct MatrixNode
@@ -39,6 +40,8 @@ private:
     std::vector<std::vector<int>> data;
     int w, h;
     friend MatrixGraph makeGraphFromFile(std::string filepath);
+    friend MatrixGraph make_graph(std::string filepath);
+    
 };
 
 std::ostream& operator<<(std::ostream& stream, const MatrixNode& node);

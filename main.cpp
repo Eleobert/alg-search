@@ -3,9 +3,11 @@
 #include <iostream>
 #include "Heuristics.h"
 
+//TODO fix const reference returns
+
 int main()
 {
-    auto graph = makeGraphFromFile("../input");
+    auto graph = make_graph("../input.xml");
 
     try
     {
