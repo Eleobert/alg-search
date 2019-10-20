@@ -30,7 +30,7 @@ auto& cost(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
     return data[node.i][node.j].cost;
 }
 
-auto cost(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
+const auto& cost(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
 {
     return data[node.i][node.j].cost;
 }
@@ -41,7 +41,7 @@ auto& parent(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
     return data[node.i][node.j].parent;
 }
 
-auto parent(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
+const auto& parent(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
 {
     return data[node.i][node.j].parent;
 }

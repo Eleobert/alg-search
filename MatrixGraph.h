@@ -30,7 +30,7 @@ struct MatrixGraph
     MatrixGraph() = default;
 
     std::vector<int>& operator[](int index){return data[index];}
-    std::vector<int> operator[](int index) const {return data[index];}
+    const std::vector<int>& operator[](int index) const {return data[index];}
 
 
     int width()  const {return w;}

@@ -2,21 +2,28 @@
 #include "Algorithms.h"
 #include <iostream>
 #include "Heuristics.h"
+#include <iterator>
+#include "Shell.h"
+
 
 //TODO fix const reference returns
 
 int main()
-{
-    auto graph = make_graph("../input.xml");
-
-    try
+{    bool quit = false;
+    do
     {
-        auto path = astar<heuristics::euclidian, 3>({2, 0}, {9, 9}, graph);
-        print(graph, path);
-    }
-    catch(const std::exception& ex)
-    {
-        std::cout << ex.what() << '\n';
-    }
+        std::cout << "> ";
+        try
+        {
+            auto graph = make_graph("../input.xml");
+            std::string command;
+            std::getline(std::cin, command);    
+            quit = run(command, graph);
+        }
+        catch(const std::exception& ex)
+        {
+            std::cout << ex.what() << '\n';
+        }
+    } while (!quit);
 
 }
