@@ -17,7 +17,7 @@ namespace heuristics
 
     inline float euclidian(const MatrixNode& start, const MatrixNode& end)
     {
-        return std::sqrt(std::pow(start.j - end.j, 2) + std::pow(start.i + end.i, 2));
+        return std::sqrt(std::pow(start.j - end.j, 2) + std::pow(start.i - end.i, 2));
     }
 
 }
