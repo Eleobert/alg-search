@@ -13,6 +13,8 @@ add_executable(alg-search
     Utils.h
     tinyxml2/tinyxml2.h
     tinyxml2/tinyxml2.cpp
+    ColoredOut.h
+    ColoredOut.cpp
 )
 
 target_link_libraries(alg-search)

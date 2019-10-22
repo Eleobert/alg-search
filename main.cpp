@@ -1,7 +1,4 @@
-#include "MatrixGraph.h"
-#include "Algorithms.h"
 #include <iostream>
-#include "Heuristics.h"
 #include <iterator>
 #include "Shell.h"
 #include "ColoredOut.h"
@@ -17,10 +14,9 @@ int main()
         normal();
         try
         {
-            auto graph = make_graph("../input.xml");
             std::string command;
             std::getline(std::cin, command);
-            quit = run(command, graph);
+            quit = run(command);
         }
         catch(const std::exception& ex)
         {

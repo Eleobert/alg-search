@@ -62,32 +62,59 @@ std::ostream& operator<<(std::ostream& stream, const MatrixNode& node)
 
 MatrixGraph::MatrixGraph(MatrixGraph&& graph)
 {
+    *this = std::move(graph);
+}
+
+MatrixGraph& MatrixGraph::operator=(MatrixGraph&& graph)
+{
     this->w = graph.w;
     this->h = graph.h;
     this->data = std::move(graph.data);
+    return *this;
 }
 
-MatrixGraph make_graph(std::string filepath)
+
+std::pair<MatrixGraph,std::string> make_graph(std::string filepath)
 {
-    MatrixGraph result;
+    std::pair<MatrixGraph,std::string> result;
 
     using namespace tinyxml2;
     XMLDocument doc;
-    doc.LoadFile(filepath.c_str());
-
-    auto map = doc.RootElement()->FirstChildElement("map");
-    result.h = map->FindAttribute("width")->IntValue();
-    result.w = map->FindAttribute("width")->IntValue();
-    std::stringstream stream(map->GetText());
-    result.data.resize(result.h);
-
-    for(int i = 0; i < result.h; i++)
+    if(doc.LoadFile(filepath.c_str()) != XML_SUCCESS)
     {
-        result.data[i].resize(result.w);
-        for(int j = 0; j < result.w; j++)
+        throw std::runtime_error("File could not be loaded!");
+    }
+    
+    auto map = doc.RootElement()->FirstChildElement("map");
+    if(!map)
+    {
+        throw std::runtime_error("No node named 'map' inside root node.");
+    }
+    auto width = map->FindAttribute("width");
+    auto height = map->FindAttribute("width");
+    if(!width || !height)
+    {
+        throw std::runtime_error("Invalid attributes width and height");
+
+    }
+    result.first.h = width->IntValue();
+    result.first.w = height->IntValue();
+    std::stringstream stream(map->GetText());
+
+    result.first.data.resize(result.first.h);
+
+    for(int i = 0; i < result.first.h; i++)
+    {
+        result.first.data[i].resize(result.first.w);
+        for(int j = 0; j < result.first.w; j++)
         {
-            stream >> result[i][j];
+            stream >> result.first[i][j];
         }
+    }
+    auto ptr = doc.RootElement()->FirstChildElement("comment");
+    if(ptr != nullptr)
+    {
+        result.second = ptr->GetText();
     }
     return result;
 }

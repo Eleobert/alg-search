@@ -3,6 +3,7 @@
 #include "Algorithms.h"
 #include "MatrixGraph.h"
 #include "Heuristics.h"
+#include "ColoredOut.h"
 
 #include <string>
 #include <sstream>
@@ -12,7 +13,7 @@
 #include <iostream>
 #include <iomanip>
 
-bool run(std::string cmd, const MatrixGraph& graph)
+bool run(std::string cmd)
 {
     struct Parameters
     {
@@ -20,6 +21,7 @@ bool run(std::string cmd, const MatrixGraph& graph)
         heuristics::heuristic_t heuristic = heuristics::noheuristic;
         bool use_theta;
         MatrixNode start, end;
+        MatrixGraph graph;
     };
     static Parameters params;
 
@@ -92,12 +94,28 @@ bool run(std::string cmd, const MatrixGraph& graph)
         else std::cout << "euclidian";
         std::cout << '\n';
         std::cout << "use_theta: " << std::boolalpha << params.use_theta << '\n';
+        std::cout << "start    : " << params.start << '\n';
+        std::cout << "end      : " << params.end << '\n';
         std::cout << "k        : " << params.k << '\n';
+    }
+    else if(commands[0] == "load")
+    {
+        auto [graph, text] = make_graph(commands[1]);
+        params.graph = std::move(graph);
+        
+        if(!text.empty())
+        {
+            bolded_black();
+            std::cout << "Comment loaded from file: ";
+            normal();
+            std::cout << text << '\n';
+        }
     }
     else if(commands[0] == "go")
     {
-       auto path = basic_algorithm(params.start, params.end, graph, params.heuristic, params.k, params.use_theta);
-       print(graph, path);
+        if(!params.graph.width() && !params.graph.height()) throw std::runtime_error("Graph not loaded!");
+       auto path = basic_algorithm(params.start, params.end, params.graph, params.heuristic, params.k, params.use_theta);
+       print(params.graph, path);
     }
     else if(commands[0] == "quit")
     {
