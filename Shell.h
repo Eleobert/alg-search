@@ -31,12 +31,15 @@ bool run(std::string cmd)
 
     std::copy(std::istream_iterator<std::string>(stream), std::istream_iterator<std::string>(),
         std::back_inserter(commands));
-
-    if(commands[0] == "set")
+    
+    if(commands.empty())
+    {
+        /*do nothing*/
+    }
+    else if(commands[0] == "set")
     {
         if(commands.size() < 2) throw std::runtime_error("Missing argument 'variable'");
         if(commands.size() < 3) throw std::runtime_error("Missing argument 'value'");
-
         if(commands[1] == "k")
         {
             params.k = std::stoi(commands[2]);
@@ -51,6 +54,10 @@ bool run(std::string cmd)
             else if(commands[2] == "euclidian")
             {
                 params.heuristic = heuristics::euclidian;
+            }
+            else if(commands[2] == "diagonal")
+            {
+                params.heuristic = heuristics::diagonal;
             }
             else if(commands[2] == "noheuristic")
             {
@@ -82,6 +89,10 @@ bool run(std::string cmd)
             params.end.i = std::stoi(commands[2]);
             params.end.j = std::stoi(commands[3]);
         }
+        else if(commands[1] == "hweight")
+        {
+            heuristics::weight = std::stoi(commands[2]);
+        }
         else throw std::runtime_error("No variable '" + commands[2] + "' found!");
 
     }
@@ -94,6 +105,7 @@ bool run(std::string cmd)
         else std::cout << "euclidian";
         std::cout << '\n';
         std::cout << "use_theta: " << std::boolalpha << params.use_theta << '\n';
+        std::cout << "hweight  : " << heuristics::weight << '\n';
         std::cout << "start    : " << params.start << '\n';
         std::cout << "end      : " << params.end << '\n';
         std::cout << "k        : " << params.k << '\n';
@@ -114,10 +126,11 @@ bool run(std::string cmd)
     else if(commands[0] == "go")
     {
         if(!params.graph.width() && !params.graph.height()) throw std::runtime_error("Graph not loaded!");
-       auto path = basic_algorithm(params.start, params.end, params.graph, params.heuristic, params.k, params.use_theta);
+       auto path = basic_algorithm(params.start, params.end, params.graph, params.heuristic, params.k, 
+        params.use_theta);
        print(params.graph, path);
     }
-    else if(commands[0] == "quit")
+    else if(commands[0] == "quit" || commands.empty())
     {
         return true;
     }
