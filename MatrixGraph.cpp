@@ -7,9 +7,17 @@
 
 namespace symbols
 {
+#ifndef _WIN32
     auto hearth = "\xe2\x99\xa5";
     auto face   = "\342\230\272";
     auto brick  = "☐";
+	auto trace = "⚬";
+#else
+	auto hearth = 'X';
+	auto face = '@';
+	auto brick = '1';
+	auto trace = '*';
+#endif
 }
 
 void print(const MatrixGraph& graph, std::vector<MatrixNode> path)
@@ -31,7 +39,7 @@ void print(const MatrixGraph& graph, std::vector<MatrixNode> path)
             else if(path[path.size() - 1].i == i && path[path.size() - 1].j == j) std::cout << symbols::face;
             else if(it != path.end())
             {
-                std::cout << "⚬";
+                std::cout << symbols::trace;
             }
             else{
                 if (graph[i][j] == 1)
