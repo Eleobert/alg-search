@@ -5,7 +5,8 @@
 #include <iostream> //TODO temporary,only for debugging
 #include <stdexcept>
 #include "Heuristics.h"
-
+#include <set>
+#include <algorithm>
 
 //TODO fix case
 
@@ -14,27 +15,40 @@ constexpr float infinity = 10000000.0f;
 struct NodeData
 {
     NodeData() = default;
-    NodeData(MatrixNode parent, float cost)
+    NodeData(MatrixNode parent, float gcost, float hcost)
     {
         this->parent = parent;
-        this->cost = cost;
+        this->gcost = gcost;
+        this->fcost = fcost;
+
     }
 
     MatrixNode parent;
-    float cost = infinity;
+    float gcost = infinity;
+    float fcost = infinity;
+
 };
 
 /* cost() and parent() should be on Utils.h, but so, I couldn't hide NodeData struct from the user */
-auto& cost(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
+auto& fcost(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
 {
-    return data[node.i][node.j].cost;
+    return data[node.i][node.j].fcost;
 }
 
-const auto& cost(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
+const auto& fcost(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
 {
-    return data[node.i][node.j].cost;
+    return data[node.i][node.j].fcost;
 }
 
+auto& gcost(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
+{
+    return data[node.i][node.j].gcost;
+}
+
+const auto& gcost(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
+{
+    return data[node.i][node.j].gcost;
+}
 
 auto& parent(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
 {
@@ -47,12 +61,12 @@ const auto& parent(const MatrixNode& node, const std::vector<std::vector<NodeDat
 }
 
 // I didn't found a pattern, so just brute force it!
-auto getNeighbors(int k, const MatrixNode& node, const MatrixGraph& graph)
+auto get_neighbors(int k, const MatrixNode& node, const MatrixGraph& graph)
 {
     std::vector<MatrixNode> result;
     auto conditionalPush = [&](int i, int j)
     {
-        if(inbox(i, j, graph.height(), graph.width()) && graph[i][j] != 1)
+        if(inbox(i, j, graph.height(), graph.width()) && !blocked(i, j, graph))
             result.emplace_back(i, j);
     };
 
@@ -105,7 +119,7 @@ auto getNeighbors(int k, const MatrixNode& node, const MatrixGraph& graph)
     return result;
 }
 
-auto recunstructPath(const MatrixNode& start, MatrixNode end, const std::vector<std::vector<NodeData>>& data)
+auto recunstruct_path(const MatrixNode& start, MatrixNode end, const std::vector<std::vector<NodeData>>& data)
 {
     std::vector<MatrixNode> result;
     while (end != start)
@@ -117,7 +131,8 @@ auto recunstructPath(const MatrixNode& start, MatrixNode end, const std::vector<
     return result;
 }
 
-auto createDataMatrix(int w, int h)
+
+auto create_data_matrix(int w, int h)
 {
     std::vector<std::vector<NodeData>> result;
     result.resize(h);
@@ -140,11 +155,12 @@ bool line_of_sight(const MatrixNode& a, const MatrixNode& b, const MatrixGraph& 
 
     for(int j = a.j; j != b.j; (a.j < b.j)? j++: j--)
     {
-        if(graph[linearx(j)][j] == 1) return false;
+        if(blocked(linearx(j), j, graph)) return false;
     }
 
     //do the same thing for i
     //create a linear function that maps i -> j
+    //But actually we don't need to. If we swap the values of i and j, of the nodes, we can use the same function above.
     auto lineary = [&](int y)
     {
         return static_cast<float>(b.j - a.j)/(b.i - a.i) * y + static_cast<float>(b.i * a.j - a.i * b.j)/(b.i - a.i);
@@ -152,12 +168,11 @@ bool line_of_sight(const MatrixNode& a, const MatrixNode& b, const MatrixGraph& 
 
     for(int i = a.i; i != b.i; (a.i < b.i)? i++: i--)
     {
-        if(graph[i][lineary(i)] == 1) return false;
+        if(blocked(i, lineary(i), graph)) return false;
     }
 
     return true;
 }
-
 
 
 void theta_update_vertex(MatrixNode& current, MatrixNode& neighbor, const MatrixGraph& graph, std::vector<std::vector<NodeData>>& data,
@@ -165,16 +180,18 @@ void theta_update_vertex(MatrixNode& current, MatrixNode& neighbor, const Matrix
 {
     if(line_of_sight(parent(current, data), neighbor, graph))
     {
-        cost(neighbor, data) = cost(parent(current, data), data) + heuristic(parent(current, data), neighbor);
+        gcost(neighbor, data) = gcost(parent(current, data), data) + heuristic(parent(current, data), neighbor);
         parent(neighbor, data) = parent(current, data);
     }
     else
     {
-        cost(neighbor, data) = cost(current, data) + heuristic(current, neighbor);
+        gcost(neighbor, data) = gcost(current, data) + heuristic(current, neighbor);
         parent(neighbor, data) = current;
     }
     
 }
+
+
 /*
  * This function seems to have a huge amount of arguments but it doesn't.
  * start - is the start point
@@ -188,60 +205,51 @@ std::vector<MatrixNode> basic_algorithm(const MatrixNode& start, const MatrixNod
     int k, bool use_theta) 
 {
 
-    if(!inbox(start.i, start.j, graph.height(), graph.width()) || graph[start.i][start.j] == 1)
+    if(!inbox(start.i, start.j, graph.height(), graph.width()) || blocked(start, graph))
         throw std::runtime_error("Invalid start point");
-    if(!inbox(end.i, end.j, graph.height(), graph.width()) || graph[end.i][end.j] == 1)
+    if(!inbox(end.i, end.j, graph.height(), graph.width()) || blocked(end, graph))
         throw std::runtime_error("Invalid end point");
 
-    auto data = createDataMatrix(graph.width(), graph.height());
+    auto data = create_data_matrix(graph.width(), graph.height());
     auto comparator = [&data](const MatrixNode& a, const MatrixNode& b){
-        return cost(a, data) < cost(b, data);
+        return fcost(a, data) < fcost(b, data);
     };
 
-    std::priority_queue<MatrixNode, std::vector<MatrixNode>, decltype(comparator)> open(comparator);
+    std::multiset<MatrixNode, decltype(comparator)> open(comparator);
 
     open.emplace(start);
     parent(start, data) = start; //to avoid bugs when looking for parent of start (bug found on theta_update_vertex)
-    cost(start, data) = 0;
+    gcost(start, data) = 0;
+    fcost(start, data) = heuristic(start, end);
 
     while(!open.empty())
     {
-        auto current = open.top();
-        open.pop();
+        auto current = *open.begin();
+        open.erase(open.begin());
 
-        for(auto& neighbor: getNeighbors(k, current, graph))
+        for(auto& neighbor: get_neighbors(k, current, graph))
         {
-            auto newcost = cost(current, data) + heuristic(neighbor, end);
-            if(newcost < data[neighbor.i][neighbor.j].cost && line_of_sight(current, neighbor, graph))
+            auto newcost = gcost(current, data) + heuristic(current, neighbor);
+            if(newcost < gcost(neighbor, data) && line_of_sight(current, neighbor, graph))
             {
-                /*if(line_of_sight(parent(current, data), neighbor, graph)) // in theta astar allways true for k < 4
-                {
-                    if(use_theta)
-                    {
-                        cost(neighbor, data) = cost(parent(current, data), data) + heuristic(parent(current, data), neighbor);
-                        parent(neighbor, data) = parent(current, data);
-                    }
-                    else
-                    {
-                        cost(neighbor, data) = newcost;
-                        parent(neighbor, data) = current;
-                    }
-                    open.emplace(neighbor);
-                }*/
                 if(use_theta)
                 {
                     theta_update_vertex(current, neighbor, graph, data, heuristic);
                 }
                 else
                 {
-                    cost(neighbor, data) = newcost;
+                    gcost(neighbor, data) = newcost;
+                    fcost(neighbor, data) = newcost + heuristic(neighbor, end);
                     parent(neighbor, data) = current;
+                }
+                if(auto e = std::find(open.begin(), open.end(), neighbor); e != open.end())
+                {
+                    open.erase(e); //remove to update it's position (below)
                 }
                 open.emplace(neighbor);
             }
         }
     }
-    if(cost(end, data) == infinity) throw std::runtime_error("No path found!");
-    return recunstructPath(start, end, data);
-
+    if(gcost(end, data) == infinity) throw std::runtime_error("No path found!");
+    return recunstruct_path(start, end, data);
 }

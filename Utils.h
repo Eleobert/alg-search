@@ -12,12 +12,13 @@ bool inbox(int i, int j, int boxH, int boxW)
     return false;
 }
 
-/*
-void throwIfInvalidNode(const MatrixNode& node, const MatrixGraph& graph, const std::string& message)
+
+const auto blocked(int i, int j, const MatrixGraph& graph)
 {
-    if(!between(-1, node.i, graph.height) || !between(-1, node.j, graph.width))
-    {
-        throw message;
-    }
+    return graph[i][j] == 1;
 }
-*/
+
+const auto blocked(const MatrixNode& node , const MatrixGraph& graph)
+{
+    return blocked(node.i, node.j, graph);
+}

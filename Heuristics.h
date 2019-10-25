@@ -10,7 +10,7 @@ namespace heuristics
 
     inline float manhattan(const MatrixNode& start, const MatrixNode& end)
     {
-        return weight * std::abs(start.i - end.i) + std::abs(start.j - end.j);
+        return weight * (std::abs(start.i - end.i) + std::abs(start.j - end.j));
     }
 
     inline float noheuristic(const MatrixNode&, const MatrixNode&)
@@ -20,14 +20,14 @@ namespace heuristics
 
     inline float euclidian(const MatrixNode& start, const MatrixNode& end)
     {
-        return weight * std::sqrt(std::pow(start.j - end.j, 2) + std::pow(start.i - end.i, 2));
+        return weight * (std::sqrt(std::pow(start.j - end.j, 2) + std::pow(start.i - end.i, 2)));
     }
 
     inline float diagonal(const MatrixNode& start, const MatrixNode& end)
     {
         int di = std::abs(end.i - start.i);
         int dj = std::abs(end.j - start.j);
-        return weight * std::min(di, dj) * std::sqrt(2.0f) + std::abs(di - dj);
+        return weight * (std::min(di, dj) * std::sqrt(2.0f) + std::abs(di - dj));
     } 
 
 }
