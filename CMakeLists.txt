@@ -2,21 +2,22 @@ cmake_minimum_required(VERSION 3.0)
 
 project(alg-search)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_COMPILER "clang++")
+
 
 add_executable(alg-search
-    main.cpp
-    MatrixGraph.h
-    MatrixGraph.cpp
-    Algorithms.h
-    Algorithms.cpp
-    Utils.h
+    src/main.cpp
+    include/MatrixGraph.h
+    src/MatrixGraph.cpp
+    include/Algorithms.h
+    src/Algorithms.cpp
+    include/Utils.h
     tinyxml2/tinyxml2.h
     tinyxml2/tinyxml2.cpp
-    ColoredOut.h
-    ColoredOut.cpp
-    Heuristics.h
-    Heuristics.cpp
+    include/ColoredOut.h
+    src/ColoredOut.cpp
+    include/Heuristics.h
+    src/Heuristics.cpp
 )
 
+target_include_directories(alg-search PRIVATE include .)
 target_link_libraries(alg-search)

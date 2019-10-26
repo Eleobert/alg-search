@@ -14,7 +14,8 @@
         0 0 0 0 0 0 0 0 0 0
     </map>
     <comment>
-    Map for exercise number 2.
+Map for exercise number 2. Non optimal path with k equals to
+4, start = (9, 0), end = (4, 9) with diagonal heuristic.
     </comment>
 
 </root>

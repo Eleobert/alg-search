@@ -14,7 +14,9 @@
         0 0 0 0 0 0 0 0 0 0
     </map>
     <comment>
-    Map for exercise number 4.
+Map for exercise number 4. This is a simple task, in most of cases A* 
+with different algorithms gives different paths. Set start = (0, 0).
+end = (9, 9), k = 3 and go.
     </comment>
 
 </root>
