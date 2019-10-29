@@ -17,6 +17,7 @@ add_executable(alg-search
     src/ColoredOut.cpp
     include/Heuristics.h
     src/Heuristics.cpp
+    include/NodeData.h
 )
 
 target_include_directories(alg-search PRIVATE include .)

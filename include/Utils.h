@@ -1,4 +1,6 @@
 #pragma once
+
+#include "NodeData.h"
 #include "MatrixGraph.h"
 
 inline bool between(int a, int value, int b){return (a < value) && (value < b);}
@@ -22,3 +24,35 @@ const auto blocked(const MatrixNode& node , const MatrixGraph& graph)
 {
     return blocked(node.i, node.j, graph);
 }
+
+auto& fcost(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
+{
+    return data[node.i][node.j].fcost;
+}
+
+const auto& fcost(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
+{
+    return data[node.i][node.j].fcost;
+}
+
+auto& gcost(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
+{
+    return data[node.i][node.j].gcost;
+}
+
+const auto& gcost(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
+{
+    return data[node.i][node.j].gcost;
+}
+
+auto& parent(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
+{
+    return data[node.i][node.j].parent;
+}
+
+const auto& parent(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
+{
+    return data[node.i][node.j].parent;
+}
+
+

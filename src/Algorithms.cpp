@@ -1,64 +1,12 @@
 #include "Algorithms.h"
 #include "Utils.h"
-#include <queue>
-#include <cmath>
-#include <iostream> //TODO temporary,only for debugging
-#include <stdexcept>
 #include "Heuristics.h"
-#include <set>
+#include "NodeData.h"
+
 #include <algorithm>
-
-//TODO fix case
-
-constexpr float infinity = 10000000.0f;
-
-struct NodeData
-{
-    NodeData() = default;
-    NodeData(MatrixNode parent, float gcost, float hcost)
-    {
-        this->parent = parent;
-        this->gcost = gcost;
-        this->fcost = fcost;
-
-    }
-
-    MatrixNode parent;
-    float gcost = infinity;
-    float fcost = infinity;
-
-};
-
-/* cost() and parent() should be on Utils.h, but so, I couldn't hide NodeData struct from the user */
-auto& fcost(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
-{
-    return data[node.i][node.j].fcost;
-}
-
-const auto& fcost(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
-{
-    return data[node.i][node.j].fcost;
-}
-
-auto& gcost(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
-{
-    return data[node.i][node.j].gcost;
-}
-
-const auto& gcost(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
-{
-    return data[node.i][node.j].gcost;
-}
-
-auto& parent(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
-{
-    return data[node.i][node.j].parent;
-}
-
-const auto& parent(const MatrixNode& node, const std::vector<std::vector<NodeData>>& data)
-{
-    return data[node.i][node.j].parent;
-}
+#include <set>
+#include <stdexcept>
+#include <cmath>
 
 // I didn't found a pattern, so just brute force it!
 auto get_neighbors(int k, const MatrixNode& node, const MatrixGraph& graph)
