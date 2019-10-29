@@ -55,4 +55,15 @@ const auto& parent(const MatrixNode& node, const std::vector<std::vector<NodeDat
     return data[node.i][node.j].parent;
 }
 
+void close(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
+{
+    data[node.i][node.j].closed  = true;
+}
+
+[[nodiscard]] auto closed(const MatrixNode& node, std::vector<std::vector<NodeData>>& data)
+{
+    return data[node.i][node.j].closed;
+}
+
+
 

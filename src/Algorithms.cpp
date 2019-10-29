@@ -177,6 +177,7 @@ std::vector<MatrixNode> basic_algorithm(const MatrixNode& start, const MatrixNod
 
         for(auto& neighbor: get_neighbors(k, current, graph))
         {
+            if(closed(neighbor, data)) continue;
             auto newcost = gcost(current, data) + heuristic(current, neighbor);
             if(newcost < gcost(neighbor, data) && line_of_sight(current, neighbor, graph))
             {
@@ -197,6 +198,7 @@ std::vector<MatrixNode> basic_algorithm(const MatrixNode& start, const MatrixNod
                 open.emplace(neighbor);
             }
         }
+        close(current, data);
     }
     if(gcost(end, data) == infinity) throw std::runtime_error("No path found!");
     return recunstruct_path(start, end, data);

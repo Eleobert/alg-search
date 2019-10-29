@@ -16,5 +16,5 @@ struct NodeData
     MatrixNode parent;
     float gcost = infinity;
     float fcost = infinity;
-
+    bool closed = false;
 };
