@@ -74,14 +74,14 @@ auto get_neighbors(int k, const MatrixNode& node, const MatrixGraph& graph)
     conditionalPush(node.i + 1, node.j);
     conditionalPush(node.i, node.j - 1);
     conditionalPush(node.i, node.j + 1);
-    
+
     if(k >= 3)
     {
         conditionalPush(node.i - 1, node.j - 1);
         conditionalPush(node.i - 1, node.j + 1);
         conditionalPush(node.i + 1, node.j - 1);
         conditionalPush(node.i + 1, node.j + 1);
-        
+
         if(k >= 4)
         {
             conditionalPush(node.i - 1, node.j - 2);
@@ -92,7 +92,7 @@ auto get_neighbors(int k, const MatrixNode& node, const MatrixGraph& graph)
             conditionalPush(node.i + 1, node.j + 2);
             conditionalPush(node.i + 2, node.j - 1);
             conditionalPush(node.i + 2, node.j + 1);
-            
+
             if(k == 5)
             {
                 conditionalPush(node.i - 1, node.j - 3);
@@ -114,7 +114,7 @@ auto get_neighbors(int k, const MatrixNode& node, const MatrixGraph& graph)
             }
         }
     }
-    
+
 
     return result;
 }
@@ -188,7 +188,7 @@ void theta_update_vertex(MatrixNode& current, MatrixNode& neighbor, const Matrix
         gcost(neighbor, data) = gcost(current, data) + heuristic(current, neighbor);
         parent(neighbor, data) = current;
     }
-    
+
 }
 
 
@@ -202,7 +202,7 @@ void theta_update_vertex(MatrixNode& current, MatrixNode& neighbor, const Matrix
  * Это все очень просто!
 */
 std::vector<MatrixNode> basic_algorithm(const MatrixNode& start, const MatrixNode& end, const MatrixGraph& graph, heuristics::heuristic_t heuristic,
-    int k, bool use_theta) 
+    int k, bool use_theta)
 {
 
     if(!inbox(start.i, start.j, graph.height(), graph.width()) || blocked(start, graph))
@@ -216,7 +216,6 @@ std::vector<MatrixNode> basic_algorithm(const MatrixNode& start, const MatrixNod
     };
 
     std::multiset<MatrixNode, decltype(comparator)> open(comparator);
-
     open.emplace(start);
     parent(start, data) = start; //to avoid bugs when looking for parent of start (bug found on theta_update_vertex)
     gcost(start, data) = 0;
@@ -225,6 +224,7 @@ std::vector<MatrixNode> basic_algorithm(const MatrixNode& start, const MatrixNod
     while(!open.empty())
     {
         auto current = *open.begin();
+        if(current == end) break; //we found the end node
         open.erase(open.begin());
 
         for(auto& neighbor: get_neighbors(k, current, graph))
